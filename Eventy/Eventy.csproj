@@ -1,13 +1,13 @@
-<Project Sdk="Dalamud.NET.Sdk/13.0.0">
+<Project Sdk="Dalamud.NET.Sdk/14.0.1">
 	<PropertyGroup>
 		<Authors>Infi</Authors>
-		<Version>1.0.5.3</Version>
+		<Version>1.0.6.0</Version>
 		<Description>Never forget a seasonal event ever again</Description>
 		<PackageProjectUrl>https://github.com/Infiziert90/Eventy</PackageProjectUrl>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFramework>net9.0-windows</TargetFramework>
+		<TargetFramework>net10.0-windows</TargetFramework>
 		<Platforms>x64</Platforms>
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
