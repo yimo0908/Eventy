@@ -6,16 +6,16 @@ public partial class ConfigWindow
 {
     private void Settings()
     {
-        using var tabItem = ImRaii.TabItem("Settings");
+        using var tabItem = ImRaii.TabItem("设置");
         if (!tabItem.Success)
             return;
 
         var changed = false;
 
-        changed |= ImGui.Checkbox("Show Server Bar", ref Plugin.Configuration.ShowDtrEntry);
-        changed |= ImGui.Checkbox("Use Short Version", ref Plugin.Configuration.UseShortVersion);
-        changed |= ImGui.Checkbox("Hide If No Events", ref Plugin.Configuration.HideForZeroEvents);
-        changed |= ImGui.Checkbox("Show PvP Seasons", ref Plugin.Configuration.ShowPvP);
+        changed |= ImGui.Checkbox("显示在服务器信息栏", ref Plugin.Configuration.ShowDtrEntry);
+        changed |= ImGui.Checkbox("使用简洁显示版本", ref Plugin.Configuration.UseShortVersion);
+        changed |= ImGui.Checkbox("无事件时隐藏", ref Plugin.Configuration.HideForZeroEvents);
+        changed |= ImGui.Checkbox("显示PVP赛季", ref Plugin.Configuration.ShowPvP);
 
         ImGuiHelpers.ScaledDummy(20.0f);
 

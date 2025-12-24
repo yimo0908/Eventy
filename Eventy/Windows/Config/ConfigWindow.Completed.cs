@@ -4,40 +4,40 @@ public partial class ConfigWindow
 {
     private void Completed()
     {
-        using var tabItem = ImRaii.TabItem("Completed");
+        using var tabItem = ImRaii.TabItem("完成情况");
         if (!tabItem.Success)
             return;
 
         var changed = false;
 
-        changed |= ImGui.Checkbox("Show Completed Events", ref Plugin.Configuration.ShowCompletedEvents);
-        
+        changed |= ImGui.Checkbox("显示已完成的事件", ref Plugin.Configuration.ShowCompletedEvents);
+
         var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
         if (!Plugin.Events.TryGetValue(date.Ticks, out var events))
         {
-            Helper.WrappedTextWithColor(ImGuiColors.DalamudViolet, "No active event at this time.");
+            Helper.WrappedTextWithColor(ImGuiColors.DalamudViolet, "当前无限时事件。");
             return;
         }
 
-        using var table = ImRaii.Table("EventList", 2, ImGuiTableFlags.BordersInner);
+        using var table = ImRaii.Table("事件列表", 2, ImGuiTableFlags.BordersInner);
         if (!table.Success)
             return;
-        
-        ImGui.TableSetupColumn("Event");
-        var rowHeaderText = "Completed?";
+
+        ImGui.TableSetupColumn("事件名称");
+        var rowHeaderText = "已完成？";
         var width = ImGui.CalcTextSize(rowHeaderText).X + (ImGui.GetStyle().ItemInnerSpacing.X * 2);
         ImGui.TableSetupColumn(rowHeaderText, ImGuiTableColumnFlags.WidthFixed, width);
-        
+
         ImGui.TableHeadersRow();
         foreach (var ev in events)
         {
             ImGui.TableNextColumn();
             Helper.TextWrapped(ev.Name);
-            
+
             ImGui.TableNextColumn();
             var pos = ImGui.GetCursorPos();
             ImGui.SetCursorPos(pos with { X = pos.X + (ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeight()) * 0.5f });
-            
+
             var isCompleted = Plugin.Configuration.CompletedEvents.Contains(ev.Id);
             if (ImGui.Checkbox($"##{ev.Id}", ref isCompleted))
             {
@@ -47,7 +47,7 @@ public partial class ConfigWindow
                 else
                     Plugin.Configuration.CompletedEvents.Remove(ev.Id);
             }
-            
+
             ImGui.TableNextRow();
         }
 

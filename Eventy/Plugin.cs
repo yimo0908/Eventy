@@ -123,7 +123,8 @@ public class Plugin : IDalamudPlugin
                 {
                     Id = ev.Id,
 
-                    Name = ev.Name,
+                    // Translate English event names to Chinese for display
+                    Name = EventTranslator.Translate(ev.Name),
                     Begin = ev.Begin,
                     End = ev.End,
                     Special = ev.Special,
