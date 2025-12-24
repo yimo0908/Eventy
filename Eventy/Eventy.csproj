@@ -1,9 +1,7 @@
 <Project Sdk="Dalamud.NET.Sdk/14.0.1">
 	<PropertyGroup>
-		<Authors>Infi</Authors>
 		<Version>1.0.6.0</Version>
-		<Description>Never forget a seasonal event ever again</Description>
-		<PackageProjectUrl>https://github.com/Infiziert90/Eventy</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/yimo0908/Eventy</PackageProjectUrl>
 	</PropertyGroup>
 
 	<PropertyGroup>

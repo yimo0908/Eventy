@@ -53,14 +53,14 @@ public class Plugin : IDalamudPlugin
     }
 
     [Command("/eventy")]
-    [HelpMessage("Opens the event calender")]
+    [HelpMessage("打开插件日历")]
     public void OpenMainCommand(string _, string __)
     {
         MainWindow.Toggle();
     }
 
     [Command("/eventyconf")]
-    [HelpMessage("Opens the event calender")]
+    [HelpMessage("打开插件设置")]
     public void OpenSettingsCommand(string _, string __)
     {
         ConfigWindow.Toggle();

@@ -14,7 +14,7 @@ public partial class ConfigWindow
 
         changed |= ImGui.Checkbox("显示在服务器信息栏", ref Plugin.Configuration.ShowDtrEntry);
         changed |= ImGui.Checkbox("使用简洁显示版本", ref Plugin.Configuration.UseShortVersion);
-        changed |= ImGui.Checkbox("无事件时隐藏", ref Plugin.Configuration.HideForZeroEvents);
+        changed |= ImGui.Checkbox("无活动时隐藏", ref Plugin.Configuration.HideForZeroEvents);
         changed |= ImGui.Checkbox("显示PVP赛季", ref Plugin.Configuration.ShowPvP);
 
         ImGuiHelpers.ScaledDummy(20.0f);

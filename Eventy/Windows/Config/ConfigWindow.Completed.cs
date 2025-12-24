@@ -10,20 +10,20 @@ public partial class ConfigWindow
 
         var changed = false;
 
-        changed |= ImGui.Checkbox("显示已完成的事件", ref Plugin.Configuration.ShowCompletedEvents);
+        changed |= ImGui.Checkbox("显示已完成的活动", ref Plugin.Configuration.ShowCompletedEvents);
 
         var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
         if (!Plugin.Events.TryGetValue(date.Ticks, out var events))
         {
-            Helper.WrappedTextWithColor(ImGuiColors.DalamudViolet, "当前无限时事件。");
+            Helper.WrappedTextWithColor(ImGuiColors.DalamudViolet, "当前无限时活动。");
             return;
         }
 
-        using var table = ImRaii.Table("事件列表", 2, ImGuiTableFlags.BordersInner);
+        using var table = ImRaii.Table("活动列表", 2, ImGuiTableFlags.BordersInner);
         if (!table.Success)
             return;
 
-        ImGui.TableSetupColumn("事件名称");
+        ImGui.TableSetupColumn("活动名称");
         var rowHeaderText = "已完成？";
         var width = ImGui.CalcTextSize(rowHeaderText).X + (ImGui.GetStyle().ItemInnerSpacing.X * 2);
         ImGui.TableSetupColumn(rowHeaderText, ImGuiTableColumnFlags.WidthFixed, width);

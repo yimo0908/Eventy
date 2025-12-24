@@ -1,10 +1,10 @@
 ﻿{
-  "Author": "Infi",
-  "Description": "Simple but useful calender\n- Current events displayed within a server bar entry for quick viewing\n- Browse through current, upcoming and previously held events\n- Special dates for Liveletters and other important occasions are highlighted",
-  "InternalName": "Eventy",
-  "Punchline":  "Never forget a seasonal event ever again",
-  "Name": "Eventy",
-  "RepoUrl": "https://github.com/Infiziert90/Eventy",
+  "Author": "Infi, translated by yimo",
+  "Description": "简单但实用的日历\n- 当前活动显示在服务器栏条目中，便于快速查看\n- 浏览当前、即将举行和过往举办的活动\n- 对制作人来信和其他重要场合的特殊日期进行高亮显示",
+  "InternalName": "EventyCN",
+  "Punchline":  "不再忘记任何季节活动",
+  "Name": "EventyCN",
+  "RepoUrl": "https://github.com/yimo0908/Eventy",
   "Tags": [
       "Plugin",
       "Events",
