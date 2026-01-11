@@ -43,7 +43,7 @@ public class ServerBar
         LastRefresh = 0;
     }
 
-    public void UpdateDtrBar(IFramework framework)
+    private void UpdateDtrBar(IFramework framework)
     {
         if (!Plugin.Configuration.ShowDtrEntry)
         {
@@ -83,7 +83,7 @@ public class ServerBar
             foreach (var ev in events)
             {
                 tooltip.AddText($"{ev.Name}\n");
-                tooltip.AddUiForeground(ev.Special ? $"{ev.Begin:f} - {ev.End:f}" : $"{ev.Begin:D} - {ev.End:D}", 58);
+                tooltip.AddUiForeground(ev.Special ? $"{ev.Begin.AddHours(8):f} - {ev.End.AddHours(1):f}" : $"{ev.Begin.AddHours(8):D} - {ev.End.AddHours(1):D}", 58);
                 tooltip.AddText("\n");
             }
 

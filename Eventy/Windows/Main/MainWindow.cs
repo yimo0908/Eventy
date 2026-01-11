@@ -221,7 +221,7 @@ public class MainWindow : Window, IDisposable
         if (isSpecial && hovered)
         {
             using var textColor = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
-            ImGui.SetTooltip($"{specialDay.Name}\n{specialDay.Begin:f} - {specialDay.End:f}");
+            ImGui.SetTooltip($"{specialDay.Name}\n{specialDay.Begin.AddHours(8):f} - {specialDay.End.AddHours(1):f}");
         }
 
         if (isEvent && events != null)
@@ -241,7 +241,7 @@ public class MainWindow : Window, IDisposable
                 if (ImGui.IsItemHovered())
                 {
                     using var textColor = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
-                    ImGui.SetTooltip($"{ev.Name}\n{ev.Begin:f} - {ev.End:f}");
+                    ImGui.SetTooltip($"{ev.Name}\n{ev.Begin.AddHours(8):f} - {ev.End.AddHours(1):f}");
                     ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
                 }
             }
