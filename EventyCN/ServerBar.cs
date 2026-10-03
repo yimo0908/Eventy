@@ -3,7 +3,7 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
 
-namespace Eventy;
+namespace EventyCN;
 
 public class ServerBar
 {
@@ -16,12 +16,12 @@ public class ServerBar
     {
         Plugin = plugin;
 
-        if (Plugin.DtrBar.Get("Eventy") is not { } entry)
+        if (Plugin.DtrBar.Get("EventyCN") is not { } entry)
             return;
 
         DtrEntry = entry;
 
-        DtrEntry.Text = "We all like events...";
+        DtrEntry.Text = "我们都喜欢活动...";
         DtrEntry.Shown = false;
         DtrEntry.OnClick += OnClick;
 
@@ -58,7 +58,7 @@ public class ServerBar
 
         var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
         var ok = Plugin.Events.TryGetValue(date.Ticks, out var events);
-        events = events?.Where(ev => !Plugin.Configuration.CompletedEvents.Contains(ev.Id) || Plugin.Configuration.ShowCompletedEvents).Where(ev => !ev.IsPvP || Plugin.Configuration.ShowPvP).ToArray();
+        events = events?.Where(ev => !Plugin.Configuration.CompletedEvents.Contains(ev.Id) || Plugin.Configuration.ShowCompletedEvents).ToArray();
 
         if (Plugin.Configuration.HideForZeroEvents && (!ok || events?.Length == 0))
         {
@@ -72,18 +72,18 @@ public class ServerBar
 
     private void UpdateBarString(bool ok, ParsedEvent[]? events)
     {
-        var text = $"{(!Plugin.Configuration.UseShortVersion ? "No Events" : $"{(char) SeIconChar.Clock} 0")}";
+        var text = $"{(!Plugin.Configuration.UseShortVersion ? "无活动" : $"{(char) SeIconChar.Clock} 0")}";
         DtrEntry!.Tooltip = null;
 
         if (ok)
         {
-            text = $"{(!Plugin.Configuration.UseShortVersion ? "Ongoing Events: " : (char) SeIconChar.Clock)} {events!.Length}";
+            text = $"{(!Plugin.Configuration.UseShortVersion ? "进行中的活动：" : (char) SeIconChar.Clock)} {events!.Length}";
 
             var tooltip = new SeStringBuilder();
-            foreach (var ev in events)
+            foreach (var ev in events!)
             {
                 tooltip.AddText($"{ev.Name}\n");
-                tooltip.AddUiForeground(ev.Special ? $"{ev.Begin:f} - {ev.End:f}" : $"{ev.Begin:D} - {ev.End:D}", 58);
+                tooltip.AddUiForeground($"{ev.Begin:yyyy-MM-dd HH:mm} - {ev.End:yyyy-MM-dd HH:mm}", 58);
                 tooltip.AddText("\n");
             }
 

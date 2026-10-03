@@ -1,0 +1,14 @@
+﻿{
+  "Author": "Infi",
+  "Description": "简单实用的日历插件\n- 在服务器栏中显示当前活动\n- 浏览当前、即将到来和过往的活动\n- 重要日期高亮显示",
+  "InternalName": "EventyCN",
+  "Punchline": "再也不忘记任何季节活动",
+  "Name": "EventyCN",
+  "RepoUrl": "https://github.com/Infiziert90/EventyCN",
+  "Tags": [
+      "Plugin",
+      "Events",
+      "Dates",
+      "DTR"
+  ]
+}

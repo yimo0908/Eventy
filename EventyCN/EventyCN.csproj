@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<Authors>Infi</Authors>
 		<Version>1.0.8.0</Version>
-		<PackageProjectUrl>https://github.com/Infiziert90/Eventy</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/Infiziert90/EventyCN</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>

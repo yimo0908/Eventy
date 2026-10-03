@@ -1,4 +1,4 @@
-namespace Eventy.Attributes;
+namespace EventyCN.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class AliasesAttribute : Attribute

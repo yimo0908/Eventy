@@ -1,7 +1,7 @@
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 
-namespace Eventy.Windows;
+namespace EventyCN.Windows;
 
 public static class Helper
 {
@@ -37,5 +37,28 @@ public static class Helper
         o |= FloatToUintSat(i.W) << 24;
 
         return o;
+    }
+
+    /// <summary>
+    /// 将十六进制颜色字符串 (如 "#D98481") 转换为 ImGui 使用的 uint 颜色值
+    /// </summary>
+    /// <param name="hex">十六进制颜色字符串，如 "#D98481"</param>
+    /// <param name="alpha">透明度 0.0~1.0，默认 1.0</param>
+    /// <returns>uint 颜色值 (ABGR 格式)</returns>
+    public static uint HexToUint(string hex, float alpha = 1.0f)
+    {
+        if (string.IsNullOrEmpty(hex))
+            return 0;
+
+        hex = hex.TrimStart('#');
+        if (hex.Length < 6)
+            return 0;
+
+        var r = Convert.ToByte(hex.Substring(0, 2), 16);
+        var g = Convert.ToByte(hex.Substring(2, 2), 16);
+        var b = Convert.ToByte(hex.Substring(4, 2), 16);
+        var a = (byte)(Saturate(alpha) * 255);
+
+        return (uint)((a << 24) | (b << 16) | (g << 8) | r);
     }
 }

@@ -2,14 +2,14 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 
-namespace Eventy.Windows.Main;
+namespace EventyCN.Windows.Main;
 
 public class MainWindow : Window, IDisposable
 {
     private readonly Plugin Plugin;
 
-    private static readonly string[] DayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    private static readonly string[] MonthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    private static readonly string[] DayNames = ["日", "一", "二", "三", "四", "五", "六"];
+    private static readonly string[] MonthNames = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
     private static readonly int[] NumDaysPerMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
 
     private static float LongestMonthWidth;
@@ -19,7 +19,7 @@ public class MainWindow : Window, IDisposable
     private readonly uint DarkGrey;
     public readonly Queue<(uint Normal, uint Opacity)> Colors;
 
-    public MainWindow(Plugin plugin) : base("Eventy##Eventy")
+    public MainWindow(Plugin plugin) : base("EventyCN##EventyCN")
     {
         Plugin = plugin;
 
@@ -80,7 +80,10 @@ public class MainWindow : Window, IDisposable
         using (ImRaii.PushId(1234))
         {
             if (ImGui.SmallButton(arrowLeft))
+            {
                 CurrentDate = CurrentDate.AddMonths(-1);
+                _ = Plugin.EnsureMonthLoaded(CurrentDate.Year, CurrentDate.Month);
+            }
 
             ImGui.SameLine();
 
@@ -94,10 +97,13 @@ public class MainWindow : Window, IDisposable
             ImGui.SameLine(0, LongestMonthWidth + style.ItemSpacing.X * 2);
 
             if (ImGui.SmallButton(arrowRight))
+            {
                 CurrentDate = CurrentDate.AddMonths(1);
+                _ = Plugin.EnsureMonthLoaded(CurrentDate.Year, CurrentDate.Month);
+            }
         }
 
-        const string todayString = "Today";
+        const string todayString = "今天";
         var todayWidth = ImGui.CalcTextSize(todayString).X + ImGui.GetStyle().FramePadding.X * 2;
         var centerOffset = (ImGui.GetWindowWidth() - todayWidth) * 0.5f;
         ImGui.SameLine(centerOffset);
@@ -109,14 +115,20 @@ public class MainWindow : Window, IDisposable
         using (ImRaii.PushId(1235))
         {
             if (ImGui.SmallButton(arrowLeft))
+            {
                 CurrentDate = CurrentDate.AddYears(-1);
+                _ = Plugin.EnsureMonthLoaded(CurrentDate.Year, CurrentDate.Month);
+            }
 
             ImGui.SameLine();
             ImGui.Text($"{CurrentDate.Year}");
             ImGui.SameLine();
 
             if (ImGui.SmallButton(arrowRight))
+            {
                 CurrentDate = CurrentDate.AddYears(1);
+                _ = Plugin.EnsureMonthLoaded(CurrentDate.Year, CurrentDate.Month);
+            }
         }
 
         ImGui.Spacing();
@@ -205,12 +217,7 @@ public class MainWindow : Window, IDisposable
 
         ImGui.SetCursorScreenPos(min);
 
-        var specialDay = new ParsedEvent();
-        if (events != null)
-            specialDay = events.FirstOrDefault(ev => ev.Special);
-
-        var isSpecial = !string.IsNullOrEmpty(specialDay.Name);
-        DrawRect(min, max, isSpecial ? specialDay.Opacity : 0, isSpecial ? specialDay.Color : DarkGrey, drawList);
+        DrawRect(min, max, 0, DarkGrey, drawList);
         if (currentDay)
         {
             var thickness = 3.0f;
@@ -218,15 +225,9 @@ public class MainWindow : Window, IDisposable
             drawList.AddRect(min + halfThickness, max - halfThickness, Helper.Vec4ToUintColor(ImGuiColors.ParsedOrange), 0.0f, 0, thickness);
         }
 
-        if (isSpecial && hovered)
-        {
-            using var textColor = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
-            ImGui.SetTooltip($"{specialDay.Name}\n{specialDay.Begin:f} - {specialDay.End:f}");
-        }
-
         if (isEvent && events != null)
         {
-            foreach (var ev in events.Where(ev => !ev.Special).Where(ev => !ev.IsPvP || Plugin.Configuration.ShowPvP))
+            foreach (var ev in events)
             {
                 var spacing = ev.Spacing * ImGuiHelpers.GlobalScale;
                 var lineMin = min with { Y = min.Y + spacing };
@@ -236,12 +237,12 @@ public class MainWindow : Window, IDisposable
 
                 ImGui.SetCursorScreenPos(lineMin);
                 if (ImGui.InvisibleButton($"##event{ev.Id}", lineMax - lineMin) && ev.Url != "")
-                    Utils.OpenUrl(ev.Url.Replace("//eu", $"//{Plugin.Configuration.Subdomain.ToValue()}"));
+                    Utils.OpenUrl(ev.Url);
 
                 if (ImGui.IsItemHovered())
                 {
                     using var textColor = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
-                    ImGui.SetTooltip($"{ev.Name}\n{ev.Begin:f} - {ev.End:f}");
+                    ImGui.SetTooltip($"{ev.Name}\n{ev.Begin:yyyy-MM-dd HH:mm} - {ev.End:yyyy-MM-dd HH:mm}");
                     ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
                 }
             }

@@ -2,7 +2,7 @@ using Dalamud.Game.Command;
 using System.Reflection;
 using Dalamud.Plugin.Services;
 
-namespace Eventy.Attributes;
+namespace EventyCN.Attributes;
 
 public class PluginCommandManager<THost> : IDisposable
 {

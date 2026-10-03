@@ -1,16 +1,16 @@
-# Eventy
-#### Never forget a seasonal event ever again
+# EventyCN
+#### 再也不忘记任何季节活动
 
-Simple but useful calender
-- Current events displayed within a server bar entry for quick viewing
-- Browse through current, upcoming and previously held events
-- Special dates for Liveletters and other important occasions are highlighted
+简单实用的日历插件
+- 在服务器栏中显示当前活动
+- 浏览当前、即将到来和过往的活动
+- 重要日期高亮显示
 
-### Calender
-![dtrEntry](Eventy/images/EventyCalender.gif)
+### 日历
+![dtrEntry](EventyCN/images/EventyCalender.gif)
 
-### Server Bar
-![dtrEntry](Eventy/images/EventyServerBar.gif)
+### 服务器栏
+![dtrEntry](EventyCN/images/EventyServerBar.gif)
 
 
 ### Icon Credit (Modified)

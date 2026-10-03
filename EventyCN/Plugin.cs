@@ -1,16 +1,17 @@
 using System.Collections.Frozen;
-using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Eventy.Attributes;
-using Eventy.Windows.Config;
-using Eventy.Windows.Main;
+using EventyCN.Attributes;
+using EventyCN.Windows;
+using EventyCN.Windows.Config;
+using EventyCN.Windows.Main;
 using Newtonsoft.Json;
 
-namespace Eventy;
+namespace EventyCN;
 
 public class Plugin : IDalamudPlugin
 {
@@ -23,7 +24,7 @@ public class Plugin : IDalamudPlugin
 
     public static Configuration Configuration { get; private set; } = null!;
 
-    public readonly WindowSystem WindowSystem = new("Eventy");
+    public readonly WindowSystem WindowSystem = new("EventyCN");
     public ConfigWindow ConfigWindow { get; init; }
     public MainWindow MainWindow { get; init; }
 
@@ -31,6 +32,9 @@ public class Plugin : IDalamudPlugin
     public readonly ServerBar ServerBar;
 
     public FrozenDictionary<long, ParsedEvent[]> Events = FrozenDictionary<long, ParsedEvent[]>.Empty;
+
+    private readonly HashSet<(int Year, int Month)> _loadedMonths = [];
+    private readonly object _loadLock = new();
 
     public Plugin()
     {
@@ -52,15 +56,15 @@ public class Plugin : IDalamudPlugin
         Task.Run(async () => await LoadEvents());
     }
 
-    [Command("/eventy")]
-    [HelpMessage("Opens the event calender")]
+    [Command("/eventycn")]
+    [HelpMessage("打开活动日历")]
     public void OpenMainCommand(string _, string __)
     {
         MainWindow.Toggle();
     }
 
-    [Command("/eventyconf")]
-    [HelpMessage("Opens the event calender")]
+    [Command("/eventycnconf")]
+    [HelpMessage("打开活动日历设置")]
     public void OpenSettingsCommand(string _, string __)
     {
         ConfigWindow.Toggle();
@@ -83,69 +87,102 @@ public class Plugin : IDalamudPlugin
         ServerBar.Dispose();
     }
 
+    /// <summary>
+    /// 初始化加载：请求当前月 ± 2 月，共 5 个月的数据
+    /// </summary>
     private async Task LoadEvents()
     {
-        var dict = new Dictionary<long, ParsedEvent[]>();
+        var now = DateTime.Now;
+        for (var offset = -2; offset <= 2; offset++)
+        {
+            var d = now.AddMonths(offset);
+            await EnsureMonthLoaded(d.Year, d.Month);
+        }
+    }
+
+    /// <summary>
+    /// 确保指定月份的数据已加载，如果尚未加载则请求 API
+    /// </summary>
+    public async Task EnsureMonthLoaded(int year, int month)
+    {
+        lock (_loadLock)
+        {
+            if (_loadedMonths.Contains((year, month)))
+                return;
+            _loadedMonths.Add((year, month));
+        }
+
+        var json = await Updater.GetEventsCn(year, month);
+        if (string.IsNullOrEmpty(json))
+            return;
+
+        CnApiResponse? resp;
         try
         {
-            var storedJson = "";
-            var file = new FileInfo(Path.Combine(PluginInterface.ConfigDirectory.FullName, "events.json"));
-            if (file.Exists)
+            resp = JsonConvert.DeserializeObject<CnApiResponse>(json);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "解析活动数据失败");
+            return;
+        }
+
+        if (resp?.Code != 10000 || resp.Data == null)
+            return;
+
+        // 过滤掉 type == 1（版本类）的事件
+        var events = resp.Data.Where(e => e.Type != 1).OrderBy(e => e.BeginTime).ToArray();
+        if (events.Length == 0)
+            return;
+
+        lock (_loadLock)
+        {
+            // 将当前 Events 转为可修改的字典
+            var dict = new Dictionary<long, ParsedEvent[]>(Events);
+
+            // 收集所有已存在的事件 ID，避免跨月活动重复添加
+            var existingIds = new HashSet<long>();
+            foreach (var arr in dict.Values)
             {
-                using var reader = new StreamReader(file.FullName);
-                storedJson = await reader.ReadToEndAsync();
+                foreach (var e in arr)
+                    existingIds.Add(e.Id);
             }
 
-            var response = await Updater.GetEvents(0);
-
-            // Check if the response is valid and if it was different to the stored version
-            if (response != string.Empty && response != storedJson)
+            foreach (var ev in events)
             {
-                storedJson = response;
+                // 如果该事件已经被前一个月的数据添加过，跳过
+                if (existingIds.Contains(ev.Id))
+                    continue;
 
-                await using var reader = new StreamWriter(file.FullName);
-                await reader.WriteAsync(storedJson);
-            }
+                var begin = DateTimeOffset.FromUnixTimeSeconds(ev.BeginTime).LocalDateTime;
+                var end = DateTimeOffset.FromUnixTimeSeconds(ev.EndTime).LocalDateTime;
 
-            var events = JsonConvert.DeserializeObject<Event[]>(storedJson, new JsonSerializerSettings
-            {
-                DateFormatString = "yyyy-MM-dd HH:mm:ssZ",
-                DateTimeZoneHandling = DateTimeZoneHandling.Local
-            })!;
-
-            foreach (var ev in events.OrderBy(ev => ev.Begin))
-            {
-                // Get colors and put it at the end of queue
-                var color = MainWindow.Colors.Dequeue();
-                MainWindow.Colors.Enqueue(color);
+                var color = Helper.HexToUint(ev.Color);
+                var opacity = Helper.HexToUint(ev.Color, 0.5f);
 
                 var eventDay = new ParsedEvent
                 {
                     Id = ev.Id,
-
                     Name = ev.Name,
-                    Begin = ev.Begin,
-                    End = ev.End,
-                    Special = ev.Special,
-                    IsPvP = ev.IsPvP,
+                    Begin = begin,
+                    End = end,
                     Url = ev.Url,
-                    Color = color.Normal,
-                    Opacity = color.Opacity,
-
-                    Spacing = 17.0f // initial spacing
+                    Color = color,
+                    Opacity = opacity,
+                    Spacing = 17.0f
                 };
 
-                foreach (var (idx, day) in Utils.EachDay(ev.Begin, ev.End).Index())
+                existingIds.Add(ev.Id);
+
+                foreach (var (idx, day) in Utils.EachDay(begin, end).Index())
                 {
                     eventDay.IsFirst = idx == 0;
                     if (!dict.TryAdd(day.Ticks, [eventDay]))
                     {
                         var entries = dict[day.Ticks];
 
-                        // We have a max of 50.0f spacing, so we wrap back around if we go above it
                         if (eventDay.IsFirst)
                         {
-                            // Check if space above is free else set spacing to +10.0f of current
                             while (eventDay.Spacing < 80.0f)
                             {
                                 if (entries.All(e => (int)e.Spacing != (int)eventDay.Spacing))
@@ -159,13 +196,11 @@ public class Plugin : IDalamudPlugin
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Unable to parse");
+
+            Events = dict.ToFrozenDictionary();
         }
 
-        Events = dict.ToFrozenDictionary();
+        ServerBar.Refresh();
     }
 
     private void DrawUi() => WindowSystem.Draw();
@@ -173,7 +208,19 @@ public class Plugin : IDalamudPlugin
     public void OpenConfig() => ConfigWindow.Toggle();
 }
 
-public class Event
+public class CnApiResponse
+{
+    [JsonProperty("code")]
+    public int Code;
+
+    [JsonProperty("msg")]
+    public string Msg = "";
+
+    [JsonProperty("data")]
+    public CnEvent[] Data = [];
+}
+
+public class CnEvent
 {
     [JsonProperty("id")]
     public long Id;
@@ -181,23 +228,31 @@ public class Event
     [JsonProperty("name")]
     public string Name = "";
 
-    [JsonProperty("begin")]
-    public DateTime Begin;
-
-    [JsonProperty("end")]
-    public DateTime End;
-
-    [JsonProperty("special")]
-    public bool Special;
-
     [JsonProperty("url")]
     public string Url = "";
 
-    [JsonProperty("pvp")]
-    public bool IsPvP;
+    [JsonProperty("begin_time")]
+    public long BeginTime;
 
-    [JsonConstructor]
-    public Event() {}
+    [JsonProperty("end_time")]
+    public long EndTime;
+
+    [JsonProperty("color")]
+    public string Color = "";
+
+    [JsonProperty("type")]
+    public int Type;
+
+    [JsonProperty("weight")]
+    public int Weight;
+
+    [JsonProperty("daoyu_sw")]
+    public int DaoyuSw;
+
+    [JsonProperty("banner_url")]
+    public string? BannerUrl;
+
+    public CnEvent() {}
 }
 
 public struct ParsedEvent
@@ -207,8 +262,6 @@ public struct ParsedEvent
     public string Name = "";
     public DateTime Begin = DateTime.UnixEpoch;
     public DateTime End = DateTime.UnixEpoch;
-    public bool Special = false;
-    public bool IsPvP = false;
     public string Url = "";
     public uint Color = 0;
     public uint Opacity = 0;

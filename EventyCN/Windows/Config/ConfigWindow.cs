@@ -1,12 +1,12 @@
 using Dalamud.Interface.Windowing;
 
-namespace Eventy.Windows.Config;
+namespace EventyCN.Windows.Config;
 
 public partial class ConfigWindow : Window, IDisposable
 {
     private readonly Plugin Plugin;
 
-    public ConfigWindow(Plugin plugin) : base("Configuration##Eventy")
+    public ConfigWindow(Plugin plugin) : base("设置##EventyCN")
     {
         Plugin = plugin;
 
@@ -28,7 +28,5 @@ public partial class ConfigWindow : Window, IDisposable
         Settings();
         
         Completed();
-
-        About();
     }
 }
