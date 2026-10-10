@@ -1,8 +1,8 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
 	<PropertyGroup>
-		<Authors>Infi</Authors>
+		<Authors>Infi yimo</Authors>
 		<Version>1.0.8.0</Version>
-		<PackageProjectUrl>https://github.com/Infiziert90/EventyCN</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/yimo0908/EventyCN</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
